@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "471475305910",
+    "project_id": "finance-dccfa",
+    "storage_bucket": "finance-dccfa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471475305910:android:b6c7e689eb49f1847d9517",
+        "android_client_info": {
+          "package_name": "com.example.finance"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW4uyCg59BoKtmRkXj_HCFP8LRbvTiG2E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
