@@ -202,7 +202,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppTheme.primaryBlack : AppTheme.lightBg,
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, automaticallyImplyLeading: false),
       body: Stack(
         children: [
           if (!Responsive.isMobile(context)) _buildBackground(isDark),
@@ -261,140 +261,164 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildContent(bool isDark) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 30),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTap: _pickImage,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: AppTheme.primaryGradient,
-                image: _imageBase64 != null
-                    ? DecorationImage(
-                        image: MemoryImage(base64Decode(_imageBase64!)),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.primaryNavy.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 40),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - 80),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: AppTheme.primaryGradient,
+                        image: _imageBase64 != null
+                            ? DecorationImage(
+                                image: MemoryImage(base64Decode(_imageBase64!)),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primaryNavy.withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: _imageBase64 == null
+                          ? const Icon(Icons.person_add_rounded, size: 50, color: Colors.white)
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    L10n.getString(context, 'signup_button').toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 24, 
+                      fontWeight: FontWeight.w900, 
+                      letterSpacing: 4, 
+                      color: isDark ? Colors.white : AppTheme.primaryNavy
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    L10n.getString(context, 'signup_subtitle'),
+                    style: TextStyle(
+                      fontSize: 12, 
+                      color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.4), 
+                      fontWeight: FontWeight.bold
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  _buildField(_nameController, L10n.getString(context, 'full_name'), Icons.badge_rounded),
+                  const SizedBox(height: 16),
+                  _buildField(
+                    _emailController, 
+                    L10n.getString(context, 'email'), 
+                    Icons.email_rounded,
+                    readOnly: _isEmailVerified,
+                    suffix: _isEmailVerified
+                      ? const Icon(Icons.check_circle_rounded, color: Colors.green, size: 20)
+                      : TextButton(
+                          onPressed: _isOtpLoading ? null : _sendOtp,
+                          child: _isOtpLoading 
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                            : Text(_isOtpSent ? L10n.getString(context, 'resend') : L10n.getString(context, 'send_otp'), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentTeal)),
+                        ),
+                  ),
+                  if (_isOtpSent && !_isEmailVerified) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(6, (index) => _buildOtpField(index, isDark)),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  _buildField(_phoneController, L10n.getString(context, 'mobile_number'), Icons.phone_android_rounded, 
+                    prefix: '+91 ', 
+                    type: TextInputType.number,
+                    formatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildField(
+                    _passwordController,
+                    L10n.getString(context, 'password'),
+                    Icons.key_rounded,
+                    isPass: true,
+                    isVisible: _isPasswordVisible,
+                    onToggle: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildField(
+                    _confirmPasswordController,
+                    L10n.getString(context, 'confirm_password'),
+                    Icons.done_all_rounded,
+                    isPass: true,
+                    isVisible: _isConfirmVisible,
+                    onToggle: () => setState(() => _isConfirmVisible = !_isConfirmVisible),
+                  ),
+                  const SizedBox(height: 40),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 60,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _isEmailVerified ? AppTheme.primaryEmerald : Colors.white10,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      ),
+                      onPressed: (_isLoading || !_isEmailVerified) ? null : _signup,
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              _isEmailVerified ? L10n.getString(context, 'signup_button') : L10n.getString(context, 'verify_email'), 
+                              style: TextStyle(
+                                color: _isEmailVerified ? Colors.white : Colors.white24, 
+                                fontWeight: FontWeight.w900, 
+                                letterSpacing: 2
+                              )
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Already have an account?", 
+                        style: TextStyle(
+                          color: isDark ? Colors.white24 : Colors.black45,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold
+                        )
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          L10n.getString(context, 'login_button').toUpperCase(), 
+                          style: const TextStyle(
+                            color: AppTheme.accentTeal, 
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1
+                          )
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              child: _imageBase64 == null
-                  ? const Icon(Icons.person_add_rounded, size: 50, color: Colors.white)
-                  : null,
             ),
           ),
-          const SizedBox(height: 32),
-          Text(
-            L10n.getString(context, 'signup_button').toUpperCase(),
-            style: TextStyle(
-              fontSize: 24, 
-              fontWeight: FontWeight.w900, 
-              letterSpacing: 4, 
-              color: isDark ? Colors.white : AppTheme.primaryNavy
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            L10n.getString(context, 'signup_subtitle'),
-            style: TextStyle(
-              fontSize: 12, 
-              color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.4), 
-              fontWeight: FontWeight.bold
-            ),
-          ),
-          const SizedBox(height: 40),
-          _buildField(_nameController, L10n.getString(context, 'full_name'), Icons.badge_rounded),
-          const SizedBox(height: 16),
-          _buildField(
-            _emailController, 
-            L10n.getString(context, 'email'), 
-            Icons.email_rounded,
-            readOnly: _isEmailVerified,
-            suffix: _isEmailVerified
-              ? const Icon(Icons.check_circle_rounded, color: Colors.green, size: 20)
-              : TextButton(
-                  onPressed: _isOtpLoading ? null : _sendOtp,
-                  child: _isOtpLoading 
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : Text(_isOtpSent ? L10n.getString(context, 'resend') : L10n.getString(context, 'send_otp'), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentTeal)),
-                ),
-          ),
-          if (_isOtpSent && !_isEmailVerified) ...[
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(6, (index) => _buildOtpField(index, isDark)),
-            ),
-          ],
-          const SizedBox(height: 16),
-          _buildField(_phoneController, L10n.getString(context, 'mobile_number'), Icons.phone_android_rounded, 
-            prefix: '+91 ', 
-            type: TextInputType.number,
-            formatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
-          ),
-          const SizedBox(height: 16),
-          _buildField(
-            _passwordController,
-            L10n.getString(context, 'password'),
-            Icons.key_rounded,
-            isPass: true,
-            isVisible: _isPasswordVisible,
-            onToggle: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-          ),
-          const SizedBox(height: 16),
-          _buildField(
-            _confirmPasswordController,
-            L10n.getString(context, 'confirm_password'),
-            Icons.done_all_rounded,
-            isPass: true,
-            isVisible: _isConfirmVisible,
-            onToggle: () => setState(() => _isConfirmVisible = !_isConfirmVisible),
-          ),
-          const SizedBox(height: 40),
-          SizedBox(
-            width: double.infinity,
-            height: 60,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isEmailVerified ? AppTheme.primaryEmerald : Colors.white10,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              ),
-              onPressed: (_isLoading || !_isEmailVerified) ? null : _signup,
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : Text(
-                      _isEmailVerified ? L10n.getString(context, 'signup_button') : L10n.getString(context, 'verify_email'), 
-                      style: TextStyle(
-                        color: _isEmailVerified ? Colors.white : Colors.white24, 
-                        fontWeight: FontWeight.w900, 
-                        letterSpacing: 2
-                      )
-                    ),
-            ),
-          ),
-          const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Already have an account?", style: TextStyle(color: isDark ? Colors.white38 : Colors.black45)),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(L10n.getString(context, 'login_button'), style: TextStyle(color: AppTheme.accentTeal, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

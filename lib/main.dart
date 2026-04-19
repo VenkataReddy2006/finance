@@ -57,6 +57,15 @@ class MainApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      builder: (context, child) {
+        final data = MediaQuery.of(context);
+        return MediaQuery(
+          data: data.copyWith(
+            textScaler: TextScaler.linear(data.textScaleFactor.clamp(1.0, 1.4)),
+          ),
+          child: child!,
+        );
+      },
       home: const SplashScreen(),
     );
   }

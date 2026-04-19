@@ -148,8 +148,10 @@ class _PersonFormScreenState extends State<PersonFormScreen> {
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(color: AppTheme.primaryEmerald.withOpacity(0.1)),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          child: Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            runSpacing: 12,
                             children: [
                               const Text('PROJECTED TOTAL', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white38, letterSpacing: 1.5)),
                               Text('₹${_totalAmount.toStringAsFixed(2)}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.cyanAccent)),

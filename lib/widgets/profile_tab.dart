@@ -256,11 +256,12 @@ class _ProfileTabState extends State<ProfileTab> {
         const SizedBox(height: 16),
         
         // Stats Row
-        Row(
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
           children: [
-            _buildStatCard(L10n.getString(context, 'groups'), financeProvider.groups.length.toString(), AppTheme.primaryEmerald, isDark),
-            const SizedBox(width: 12),
-            _buildStatCard(L10n.getString(context, 'people'), financeProvider.people.length.toString(), AppTheme.accentGold, isDark),
+            _buildStatCard(context, L10n.getString(context, 'groups'), financeProvider.groups.length.toString(), AppTheme.primaryEmerald, isDark),
+            _buildStatCard(context, L10n.getString(context, 'people'), financeProvider.people.length.toString(), AppTheme.accentGold, isDark),
           ],
         ),
         
@@ -305,22 +306,21 @@ class _ProfileTabState extends State<ProfileTab> {
     );
   }
 
-  Widget _buildStatCard(String label, String value, Color color, bool isDark) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isDark ? AppTheme.primaryNavy : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: isDark ? Colors.white.withOpacity(0.04) : AppTheme.primaryNavy.withOpacity(0.05)),
-        ),
-        child: Column(
-          children: [
-            Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: color)),
-            const SizedBox(height: 4),
-            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.4))),
-          ],
-        ),
+  Widget _buildStatCard(BuildContext context, String label, String value, Color color, bool isDark) {
+    return Container(
+      width: (MediaQuery.of(context).size.width / 2) - 30, // Dynamic width for mobile
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.primaryNavy : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isDark ? Colors.white.withOpacity(0.04) : AppTheme.primaryNavy.withOpacity(0.05)),
+      ),
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: color)),
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.4))),
+        ],
       ),
     );
   }

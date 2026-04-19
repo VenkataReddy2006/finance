@@ -109,22 +109,24 @@ class _SplashScreenState extends State<SplashScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(20),
+                width: 160,
+                height: 160,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: AppTheme.primaryGradient,
+                  border: Border.all(color: Colors.white.withOpacity(0.1), width: 4),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.primaryNavy.withOpacity(0.5),
-                      blurRadius: 30,
-                      offset: const Offset(0, 10),
+                      color: AppTheme.primaryNavy.withOpacity(0.3),
+                      blurRadius: 40,
+                      offset: const Offset(0, 20),
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.account_balance_wallet_rounded,
-                  size: 80,
-                  color: Colors.white,
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/profile.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
               const SizedBox(height: 32),

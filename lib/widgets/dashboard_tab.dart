@@ -21,11 +21,12 @@ class DashboardTab extends StatelessWidget {
 
         final isDesktop = Responsive.isDesktop(context);
         final isTablet = Responsive.isTablet(context);
+        final isMobile = Responsive.isMobile(context);
 
         return SingleChildScrollView(
           padding: EdgeInsets.symmetric(
-            horizontal: isDesktop ? 60.0 : 20.0,
-            vertical: 8.0,
+            horizontal: isDesktop ? 80.0 : (isTablet ? 40.0 : 20.0),
+            vertical: 16.0,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,17 +38,25 @@ class DashboardTab extends StatelessWidget {
                 children: [
                   Text(
                     L10n.getString(context, 'ledger_groups'),
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                    style: TextStyle(
+                      fontSize: isDesktop ? 32 : 24, 
+                      fontWeight: FontWeight.w800, 
+                      letterSpacing: -0.5
+                    ),
                   ),
                   IconButton(
                     onPressed: () => _showAddGroupDialog(context, provider),
-                    icon: const Icon(Icons.add_circle_outline_rounded, color: AppTheme.primaryEmerald, size: 28),
+                    icon: Icon(
+                      Icons.add_circle_outline_rounded, 
+                      color: AppTheme.primaryEmerald, 
+                      size: isDesktop ? 32 : 28
+                    ),
                     tooltip: L10n.getString(context, 'add_new'),
                   ),
                 ],
               ),
               const SizedBox(height: 24),
-              _buildGroupGrid(context, provider, isDesktop, isTablet),
+              _buildGroupGrid(context, provider, isDesktop, isTablet, isMobile),
               const SizedBox(height: 40),
             ],
           ),
@@ -60,15 +69,16 @@ class DashboardTab extends StatelessWidget {
     final isDesktop = Responsive.isDesktop(context);
     final isTablet = Responsive.isTablet(context);
     
-    if (isDesktop || isTablet) {
-      return Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: isDesktop ? 900 : 700),
-          child: _buildSummaryCard(context, provider, isDesktop || isTablet),
+    return Center(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        constraints: BoxConstraints(
+          maxWidth: isDesktop ? 1200 : (isTablet ? 800 : double.infinity)
         ),
-      );
-    }
-    return _buildSummaryCard(context, provider, false);
+        child: _buildSummaryCard(context, provider, isDesktop || isTablet),
+      ),
+    );
   }
 
   Widget _buildSummaryCard(BuildContext context, FinanceProvider provider, bool useGlass) {
@@ -78,8 +88,8 @@ class DashboardTab extends StatelessWidget {
     
     if (useGlass) {
       return GlassBox(
-        padding: const EdgeInsets.all(40.0),
-        borderRadius: 30,
+        padding: EdgeInsets.all(Responsive.isDesktop(context) ? 50.0 : 40.0),
+        borderRadius: 32,
         child: _buildSummaryContent(context, provider, isDark, balanceColor),
       );
     }
@@ -109,13 +119,23 @@ class DashboardTab extends StatelessWidget {
   }
 
   Widget _buildSummaryContent(BuildContext context, FinanceProvider provider, bool isDark, Color balanceColor) {
+    final bool isDesktop = Responsive.isDesktop(context);
+    
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(L10n.getString(context, 'total_balance').toUpperCase(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.4), letterSpacing: 1.5)),
-            const Icon(Icons.auto_graph_rounded, color: AppTheme.accentGold, size: 24),
+            Text(
+              L10n.getString(context, 'total_balance').toUpperCase(), 
+              style: TextStyle(
+                fontSize: isDesktop ? 14 : 12, 
+                fontWeight: FontWeight.w900, 
+                color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.4), 
+                letterSpacing: 2
+              )
+            ),
+            Icon(Icons.auto_graph_rounded, color: AppTheme.accentGold, size: isDesktop ? 32 : 24),
           ],
         ),
         const SizedBox(height: 12),
@@ -123,18 +143,25 @@ class DashboardTab extends StatelessWidget {
           children: [
             Text(
               '₹${provider.weeklyBalance.toStringAsFixed(0)}',
-              style: TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: balanceColor, letterSpacing: -2),
+              style: TextStyle(
+                fontSize: isDesktop ? 64 : 48, 
+                fontWeight: FontWeight.w900, 
+                color: balanceColor, 
+                letterSpacing: -2
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 48),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        SizedBox(height: isDesktop ? 60 : 40),
+        Wrap(
+          spacing: isDesktop ? 40 : 16,
+          runSpacing: 24,
+          alignment: WrapAlignment.spaceBetween,
           children: [
             _summaryItem(L10n.getString(context, 'principal'), '₹${provider.weeklyPrincipal.toStringAsFixed(0)}', isDark ? Colors.white : AppTheme.primaryNavy),
             _summaryItem(L10n.getString(context, 'interest'), '₹${provider.weeklyInterest.toStringAsFixed(0)}', AppTheme.accentTeal),
             _summaryItem(L10n.getString(context, 'given'), '₹${provider.weeklyGiven.toStringAsFixed(0)}', AppTheme.primaryEmerald),
-            if (Responsive.isDesktop(context))
+            if (isDesktop)
                _summaryItem(L10n.getString(context, 'ledger_status'), 'Premium Classic Active', AppTheme.accentGold),
           ],
         ),
@@ -153,22 +180,31 @@ class DashboardTab extends StatelessWidget {
     );
   }
 
-  Widget _buildGroupGrid(BuildContext context, FinanceProvider provider, bool isDesktop, bool isTablet) {
-    int crossAxisCount = 2;
-    if (isDesktop) {
-      crossAxisCount = 6;
-    } else if (isTablet) {
-      crossAxisCount = 4;
+  Widget _buildGroupGrid(BuildContext context, FinanceProvider provider, bool isDesktop, bool isTablet, bool isMobile) {
+    if (isMobile) {
+      // Mobile View: Contact List style
+      return Column(
+        children: provider.groups.map((group) {
+          final groupPeople = provider.getPeopleForGroup(group.id);
+          return Column(
+            children: [
+              _buildGroupListTile(context, group, groupPeople.length, provider),
+              const SizedBox(height: 12),
+            ],
+          );
+        }).toList(),
+      );
     }
-    
+
+    int crossAxisCount = isDesktop ? 5 : (MediaQuery.of(context).size.width > 850 ? 4 : 3);
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
-        childAspectRatio: (isDesktop || isTablet) ? 1.2 : 1.4,
+        crossAxisSpacing: 24,
+        mainAxisSpacing: 24,
+        childAspectRatio: isDesktop ? 1.3 : 1.1,
       ),
       itemCount: provider.groups.length,
       itemBuilder: (context, index) {
@@ -176,6 +212,84 @@ class DashboardTab extends StatelessWidget {
         final groupPeople = provider.getPeopleForGroup(group.id);
         return _buildGroupCard(context, group, groupPeople.length, provider);
       },
+    );
+  }
+
+  Widget _buildGroupListTile(BuildContext context, Group group, int count, FinanceProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => DayDetailScreen(groupId: group.id, groupName: group.name)),
+        );
+      },
+      onLongPress: () => _showGroupOptions(context, group, provider),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? AppTheme.primaryNavy : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: isDark ? Colors.white.withOpacity(0.04) : AppTheme.primaryNavy.withOpacity(0.05), width: 1.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                gradient: AppTheme.primaryGradient,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Center(
+                child: Text(
+                  group.name[0].toUpperCase(),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    group.name,
+                    style: TextStyle(
+                      fontSize: 16, 
+                      fontWeight: FontWeight.w800, 
+                      color: isDark ? Colors.white : AppTheme.primaryNavy
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.people_outline_rounded, size: 12, color: isDark ? AppTheme.primaryEmerald : AppTheme.primaryNavy.withOpacity(0.4)),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$count People',
+                        style: TextStyle(
+                          fontSize: 12, 
+                          fontWeight: FontWeight.bold, 
+                          color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.4)
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () => _showGroupOptions(context, group, provider),
+              child: Icon(Icons.more_vert_rounded, size: 20, color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.2)),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.chevron_right_rounded, size: 20, color: isDark ? Colors.white10 : AppTheme.primaryNavy.withOpacity(0.1)),
+          ],
+        ),
+      ),
     );
   }
 
@@ -235,15 +349,16 @@ class DashboardTab extends StatelessWidget {
                     color: AppTheme.primaryEmerald.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Row(
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 4,
                     children: [
                       const Icon(Icons.people_outline_rounded, size: 14, color: AppTheme.primaryEmerald),
-                      const SizedBox(width: 8),
                       const Text(
                         'COUNT',
                         style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.white24, letterSpacing: 1),
                       ),
-                      const SizedBox(width: 8),
                       Text(
                         '$count',
                         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppTheme.primaryEmerald),

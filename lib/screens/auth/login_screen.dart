@@ -143,107 +143,131 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildContent(bool isDark) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 30),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: AppTheme.primaryGradient,
-            ),
-            child: const Icon(Icons.lock_person_rounded, size: 50, color: Colors.white),
-          ),
-          const SizedBox(height: 48),
-          Text(
-            L10n.getString(context, 'welcome'),
-            style: TextStyle(
-              fontSize: 24, 
-              fontWeight: FontWeight.w900, 
-              letterSpacing: 4, 
-              color: isDark ? Colors.white : AppTheme.primaryNavy
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            L10n.getString(context, 'login_subtitle'),
-            style: TextStyle(
-              fontSize: 12, 
-              color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.4), 
-              fontWeight: FontWeight.bold
-            ),
-          ),
-          const SizedBox(height: 48),
-          _buildField(
-            _identifierController, 
-            _isEmailMode ? L10n.getString(context, 'email') : L10n.getString(context, 'mobile_number'), 
-            _isEmailMode ? Icons.email_rounded : Icons.phone_android_rounded,
-            prefix: _isEmailMode ? null : '+91 ',
-            type: _isEmailMode ? TextInputType.emailAddress : TextInputType.number,
-            formatters: _isEmailMode ? null : [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
-            suffix: IconButton(
-              icon: Icon(_isEmailMode ? Icons.phone_android_rounded : Icons.email_rounded, size: 18, color: AppTheme.accentTeal),
-              onPressed: () {
-                setState(() {
-                  _isEmailMode = !_isEmailMode;
-                  _identifierController.clear();
-                });
-              },
-            ),
-          ),
-          const SizedBox(height: 20),
-          _buildField(
-            _passwordController,
-            L10n.getString(context, 'password'),
-            Icons.key_rounded,
-            isPass: true,
-            isVisible: _isPasswordVisible,
-            onToggle: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-          ),
-          const SizedBox(height: 48),
-          SizedBox(
-            width: double.infinity,
-            height: 60,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryEmerald,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 40),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - 80),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: AppTheme.primaryGradient,
+                    ),
+                    child: const Icon(Icons.lock_person_rounded, size: 50, color: Colors.white),
+                  ),
+                  const SizedBox(height: 48),
+                  Text(
+                    L10n.getString(context, 'welcome'),
+                    style: TextStyle(
+                      fontSize: 24, 
+                      fontWeight: FontWeight.w900, 
+                      letterSpacing: 4, 
+                      color: isDark ? Colors.white : AppTheme.primaryNavy
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    L10n.getString(context, 'login_subtitle'),
+                    style: TextStyle(
+                      fontSize: 12, 
+                      color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.4), 
+                      fontWeight: FontWeight.bold
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+                  _buildField(
+                    _identifierController, 
+                    _isEmailMode ? L10n.getString(context, 'email') : L10n.getString(context, 'mobile_number'), 
+                    _isEmailMode ? Icons.email_rounded : Icons.phone_android_rounded,
+                    prefix: _isEmailMode ? null : '+91 ',
+                    type: _isEmailMode ? TextInputType.emailAddress : TextInputType.number,
+                    formatters: _isEmailMode ? null : [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
+                    suffix: IconButton(
+                      icon: Icon(_isEmailMode ? Icons.phone_android_rounded : Icons.email_rounded, size: 18, color: AppTheme.accentTeal),
+                      onPressed: () {
+                        setState(() {
+                          _isEmailMode = !_isEmailMode;
+                          _identifierController.clear();
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildField(
+                    _passwordController,
+                    L10n.getString(context, 'password'),
+                    Icons.key_rounded,
+                    isPass: true,
+                    isVisible: _isPasswordVisible,
+                    onToggle: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                  ),
+                  const SizedBox(height: 48),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 60,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryEmerald,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      ),
+                      onPressed: _isLoading ? null : _login,
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(L10n.getString(context, 'login_button'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 2)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                    ),
+                    child: Text(
+                      L10n.getString(context, 'forgot_password'),
+                      style: TextStyle(color: isDark ? Colors.white38 : AppTheme.primaryNavy.withOpacity(0.4), fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        L10n.getString(context, 'signup_link'), 
+                        style: TextStyle(
+                          color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.4),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold
+                        )
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SignupScreen()),
+                        ),
+                        child: Text(
+                          L10n.getString(context, 'signup_button').toUpperCase(), 
+                          style: const TextStyle(
+                            color: AppTheme.accentTeal, 
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1
+                          )
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              onPressed: _isLoading ? null : _login,
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : Text(L10n.getString(context, 'login_button'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 2)),
             ),
           ),
-          const SizedBox(height: 12),
-          TextButton(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
-            ),
-            child: Text(
-              L10n.getString(context, 'forgot_password'),
-              style: TextStyle(color: isDark ? Colors.white38 : AppTheme.primaryNavy.withOpacity(0.4), fontSize: 12, fontWeight: FontWeight.bold),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(L10n.getString(context, 'signup_link'), style: TextStyle(color: isDark ? Colors.white38 : AppTheme.primaryNavy.withOpacity(0.4))),
-              TextButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignupScreen()),
-                ),
-                child: Text(L10n.getString(context, 'signup_button'), style: const TextStyle(color: AppTheme.accentTeal, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

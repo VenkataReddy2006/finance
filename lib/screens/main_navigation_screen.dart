@@ -35,6 +35,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     bool isMobile = Responsive.isMobile(context);
+    bool isTablet = Responsive.isTablet(context);
+    bool isDesktop = Responsive.isDesktop(context);
 
     return Scaffold(
       extendBody: true,
@@ -60,7 +62,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           if (!isMobile) _buildBackground(isDark),
           Row(
             children: [
-              if (!isMobile) _buildNavigationRail(context, isDark),
+              if (!isMobile) 
+                _buildAdaptiveSideBar(context, isDark, isTablet, isDesktop),
               Expanded(
                 child: Container(
                   padding: EdgeInsets.symmetric(
@@ -92,6 +95,101 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       endDrawer: _selectedIndex == 2
           ? _buildProfileDrawer(context, isDark)
           : null,
+    );
+  }
+
+  Widget _buildAdaptiveSideBar(BuildContext context, bool isDark, bool isTablet, bool isDesktop) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border(
+          right: BorderSide(
+            color: isDark ? Colors.white.withOpacity(0.05) : AppTheme.primaryNavy.withOpacity(0.05),
+            width: 1,
+          ),
+        ),
+      ),
+      child: NavigationRail(
+        extended: isDesktop, // Full rail for PC
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+        backgroundColor: Colors.transparent,
+        indicatorColor: AppTheme.primaryEmerald.withOpacity(0.1),
+        labelType: isDesktop ? NavigationRailLabelType.none : NavigationRailLabelType.all,
+        selectedLabelTextStyle: TextStyle(
+          color: isDark ? AppTheme.primaryEmerald : AppTheme.primaryNavy,
+          fontWeight: FontWeight.bold,
+          fontSize: 11,
+          letterSpacing: 1,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.4),
+          fontSize: 11,
+          letterSpacing: 1,
+        ),
+        leading: isDesktop ? _buildRailHeader(isDark) : null,
+        destinations: [
+          NavigationRailDestination(
+            icon: const Icon(Icons.grid_view_rounded),
+            selectedIcon: Icon(
+              Icons.grid_view_rounded,
+              color: isDark ? AppTheme.primaryEmerald : AppTheme.primaryNavy,
+            ),
+            label: Text(L10n.getString(context, 'summary')),
+          ),
+          NavigationRailDestination(
+            icon: const Icon(Icons.account_balance_wallet_rounded),
+            selectedIcon: const Icon(
+              Icons.account_balance_wallet_rounded,
+              color: AppTheme.accentTeal,
+            ),
+            label: Text(L10n.getString(context, 'payments')),
+          ),
+          NavigationRailDestination(
+            icon: const Icon(Icons.person_rounded),
+            selectedIcon: const Icon(
+              Icons.person_rounded,
+              color: AppTheme.accentGold,
+            ),
+            label: Text(L10n.getString(context, 'profile')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRailHeader(bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 30),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: AppTheme.primaryGradient,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryEmerald.withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.account_balance_rounded, color: Colors.white, size: 28),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'FINANCE',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 3,
+              color: AppTheme.accentGold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -294,54 +392,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         color: Colors.white10,
       ),
       onTap: onTap,
-    );
-  }
-
-  Widget _buildNavigationRail(BuildContext context, bool isDark) {
-    bool isMobile = Responsive.isMobile(context);
-    return NavigationRail(
-      selectedIndex: _selectedIndex,
-      onDestinationSelected: (index) => setState(() => _selectedIndex = index),
-      backgroundColor: isMobile
-          ? (isDark ? AppTheme.primaryNavy : AppTheme.lightBg)
-          : Colors.transparent,
-      indicatorColor: AppTheme.primaryEmerald.withOpacity(0.1),
-      labelType: NavigationRailLabelType.all,
-      selectedLabelTextStyle: TextStyle(
-        color: isDark ? AppTheme.primaryEmerald : AppTheme.primaryNavy,
-        fontWeight: FontWeight.bold,
-        fontSize: 11,
-      ),
-      unselectedLabelTextStyle: TextStyle(
-        color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.4),
-        fontSize: 11,
-      ),
-      destinations: [
-        NavigationRailDestination(
-          icon: const Icon(Icons.grid_view_rounded),
-          selectedIcon: Icon(
-            Icons.grid_view_rounded,
-            color: isDark ? AppTheme.primaryEmerald : AppTheme.primaryNavy,
-          ),
-          label: const Text('Summary'),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.account_balance_wallet_rounded),
-          selectedIcon: Icon(
-            Icons.account_balance_wallet_rounded,
-            color: AppTheme.accentTeal,
-          ),
-          label: const Text('Payments'),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.person_rounded),
-          selectedIcon: const Icon(
-            Icons.person_rounded,
-            color: AppTheme.accentGold,
-          ),
-          label: const Text('Profile'),
-        ),
-      ],
     );
   }
 

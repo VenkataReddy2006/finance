@@ -106,10 +106,11 @@ class PaymentsTab extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 32),
-                        Row(
+                        Wrap(
+                          spacing: 32,
+                          runSpacing: 20,
                           children: [
                             _statItem('₹${totalAmt.toStringAsFixed(0)}', 'TOTAL COLLECTED', AppTheme.primaryEmerald, isDark),
-                            const Spacer(),
                             _statItem(pCount.toString(), 'ENTRIES', isDark ? Colors.white38 : AppTheme.primaryNavy.withOpacity(0.4), isDark),
                           ],
                         ),

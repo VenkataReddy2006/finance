@@ -169,8 +169,10 @@ class _DayDetailScreenState extends State<DayDetailScreen> {
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            runSpacing: 16,
+            spacing: 16,
             children: [
               _metricItem(
                 context,
@@ -185,15 +187,17 @@ class _DayDetailScreenState extends State<DayDetailScreen> {
                 (summary['balance'] ?? 0) < 0
                     ? AppTheme.accentRed
                     : AppTheme.primaryEmerald,
-                isRight: true,
+                isRight: false,
               ),
             ],
           ),
           const SizedBox(height: 24),
           const Divider(color: Colors.white, height: 1),
           const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            spacing: 20,
+            runSpacing: 20,
+            alignment: WrapAlignment.spaceBetween,
             children: [
               _metricItem(
                 context,
@@ -207,7 +211,7 @@ class _DayDetailScreenState extends State<DayDetailScreen> {
                 L10n.getString(context, 'interest').toUpperCase(),
                 '₹${summary['interest']?.toStringAsFixed(0)}',
                 AppTheme.accentTeal,
-                isRight: true,
+                isRight: false,
                 size: 14,
               ),
               _metricItem(
@@ -215,7 +219,7 @@ class _DayDetailScreenState extends State<DayDetailScreen> {
                 L10n.getString(context, 'given').toUpperCase(),
                 '₹${summary['given']?.toStringAsFixed(0)}',
                 AppTheme.primaryEmerald,
-                isRight: true,
+                isRight: false,
                 size: 14,
               ),
             ],

@@ -149,8 +149,10 @@ class PersonDetailScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            runSpacing: 16,
+            spacing: 16,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,8 +171,10 @@ class PersonDetailScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          Wrap(
+            alignment: WrapAlignment.start,
+            spacing: 24,
+            runSpacing: 24,
             children: [
               _metric(context, L10n.getString(context, 'principal'), person.principal.toStringAsFixed(0), AppTheme.primaryEmerald),
               _metric(context, L10n.getString(context, 'interest'), person.interest.toStringAsFixed(0), AppTheme.accentGold),
@@ -185,8 +189,10 @@ class PersonDetailScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(24),
               border: Border.all(color: Colors.white.withOpacity(0.04)),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+            child: Wrap(
+              alignment: WrapAlignment.start,
+              spacing: 32,
+              runSpacing: 24,
               children: [
                 _metric(context, L10n.getString(context, 'given'), person.totalGiven.toStringAsFixed(0), AppTheme.accentTeal),
                 _metric(context, L10n.getString(context, 'balance'), person.balance.toStringAsFixed(0), person.balance < 0 ? AppTheme.accentRed : AppTheme.primaryEmerald, isLarge: true),
