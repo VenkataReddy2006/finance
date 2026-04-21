@@ -217,7 +217,7 @@ class _PersonFormScreenState extends State<PersonFormScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(DateFormat('dd MMMM yyyy').format(_selectedDate), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(DateFormat('dd-MM-yyyy').format(_selectedDate), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 Icon(Icons.calendar_today_rounded, size: 18, color: isDark ? Colors.white24 : AppTheme.primaryNavy.withOpacity(0.2)),
               ],
             ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/hive_service.dart';
 
 class LanguageProvider extends ChangeNotifier {
-  Locale _locale = const Locale('en');
+  Locale _locale = const Locale('en', 'IN');
 
   Locale get locale => _locale;
 

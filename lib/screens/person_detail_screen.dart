@@ -73,14 +73,20 @@ class PersonDetailScreen extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.indigo.withOpacity(0.05), borderRadius: BorderRadius.circular(8)),
-                            child: const Icon(Icons.history_rounded, size: 16, color: Colors.indigoAccent),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.indigo.withOpacity(0.05), borderRadius: BorderRadius.circular(8)),
+                                child: const Icon(Icons.history_rounded, size: 16, color: Colors.indigoAccent),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(L10n.getString(context, 'transaction_history').toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.white38, letterSpacing: 1.5)),
+                            ],
                           ),
-                          const SizedBox(width: 12),
-                          Text(L10n.getString(context, 'transaction_history').toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.white38, letterSpacing: 1.5)),
+                          Text('${person.payments.length} ${person.payments.length == 1 ? 'TRANSACTION' : 'TRANSACTIONS'}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppTheme.accentGold, letterSpacing: 1)),
                         ],
                       ),
                     ),
@@ -106,10 +112,19 @@ class PersonDetailScreen extends StatelessWidget {
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                   leading: CircleAvatar(backgroundColor: AppTheme.primaryEmerald.withOpacity(0.1), radius: 18, child: const Icon(Icons.payment, size: 16, color: AppTheme.primaryEmerald)),
                                   title: Text('₹${payment.amount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: -0.5)),
-                                  subtitle: Text(DateFormat('dd MMMM yyyy').format(payment.date).toUpperCase(), style: const TextStyle(fontSize: 10, color: Colors.white24, fontWeight: FontWeight.bold)),
-                                  trailing: IconButton(
-                                    icon: const Icon(Icons.close_rounded, size: 20, color: Colors.redAccent),
-                                    onPressed: () => provider.deletePayment(person.id, payment.id),
+                                  subtitle: Text(DateFormat('dd-MM-yyyy').format(payment.date).toUpperCase(), style: const TextStyle(fontSize: 10, color: Colors.white24, fontWeight: FontWeight.bold)),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.edit_rounded, size: 18, color: AppTheme.accentGold),
+                                        onPressed: () => _showEditPaymentDialog(context, provider, payment),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.close_rounded, size: 20, color: Colors.redAccent),
+                                        onPressed: () => provider.deletePayment(person.id, payment.id),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               );
@@ -215,6 +230,72 @@ class PersonDetailScreen extends StatelessWidget {
     );
   }
 
+
+
+  void _showEditPaymentDialog(BuildContext context, FinanceProvider provider, payment) {
+    final amountController = TextEditingController(text: payment.amount.toString());
+    DateTime selectedDate = payment.date;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          backgroundColor: const Color(0xFF14142B),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          title: const Text('EDIT PAYMENT', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: amountController,
+                decoration: InputDecoration(labelText: '${L10n.getString(context, 'amount')} (₹)', labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                keyboardType: TextInputType.number,
+                autofocus: true,
+              ),
+              const SizedBox(height: 24),
+              InkWell(
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (date != null) setState(() => selectedDate = date);
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.04), borderRadius: BorderRadius.circular(18), border: Border.all(color: Colors.white.withOpacity(0.04))),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(DateFormat('dd-MM-yyyy').format(selectedDate).toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white60)),
+                      const Icon(Icons.calendar_month_rounded, size: 20, color: Colors.cyanAccent),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: Text(L10n.getString(context, 'cancel'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white38))),
+            ElevatedButton(
+              onPressed: () {
+                final amt = double.tryParse(amountController.text);
+                if (amt != null) {
+                  provider.updatePayment(personId, payment.id, amt, selectedDate);
+                  Navigator.pop(context);
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryEmerald, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+              child: const Text("UPDATE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 1)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showAddPaymentDialog(BuildContext context, FinanceProvider provider) {
     final amountController = TextEditingController();
     DateTime selectedDate = DateTime.now();
@@ -252,7 +333,7 @@ class PersonDetailScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(DateFormat('dd MMMM yyyy').format(selectedDate).toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white60)),
+                      Text(DateFormat('dd-MM-yyyy').format(selectedDate).toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white60)),
                       const Icon(Icons.calendar_month_rounded, size: 20, color: Colors.cyanAccent),
                     ],
                   ),

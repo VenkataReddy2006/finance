@@ -125,6 +125,14 @@ class ApiService {
     );
   }
 
+  Future<void> updatePayment(String personId, String paymentId, Map<String, dynamic> payment) async {
+    await http.put(
+      Uri.parse('$baseUrl/people/$personId/payments/$paymentId'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(payment),
+    );
+  }
+
   Future<void> deletePayment(String personId, String paymentId) async {
     await http.delete(Uri.parse('$baseUrl/people/$personId/payments/$paymentId'));
   }

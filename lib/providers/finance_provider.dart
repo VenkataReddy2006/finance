@@ -234,6 +234,27 @@ class FinanceProvider with ChangeNotifier {
     }
   }
 
+  Future<void> updatePayment(String personId, String paymentId, double amount, DateTime date) async {
+    final payment = Payment(id: paymentId, amount: amount, date: date);
+    
+    try {
+      await _apiService.updatePayment(personId, paymentId, payment.toJson());
+      
+      final personIndex = _people.indexWhere((p) => p.id == personId);
+      if (personIndex != -1) {
+        final updatedPerson = _people[personIndex];
+        final paymentIndex = updatedPerson.payments.indexWhere((p) => p.id == paymentId);
+        if (paymentIndex != -1) {
+          updatedPerson.payments[paymentIndex] = payment;
+          await HiveService.savePerson(updatedPerson);
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error updating payment: $e');
+    }
+  }
+
   Future<void> deletePayment(String personId, String paymentId) async {
     try {
       await _apiService.deletePayment(personId, paymentId);
